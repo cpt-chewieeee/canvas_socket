@@ -1,6 +1,0 @@
-server.go:7:2: cannot find package "github.com/graarh/golang-socketio" in any of:
-	/usr/local/go/src/github.com/graarh/golang-socketio (from $GOROOT)
-	/go/src/github.com/graarh/golang-socketio (from $GOPATH)
-server.go:8:2: cannot find package "github.com/graarh/golang-socketio/transport" in any of:
-	/usr/local/go/src/github.com/graarh/golang-socketio/transport (from $GOROOT)
-	/go/src/github.com/graarh/golang-socketio/transport (from $GOPATH)

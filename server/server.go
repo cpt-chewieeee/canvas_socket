@@ -3,29 +3,40 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"github.com/julienschmidt/httprouter"
+	// "github.com/julienschmidt/httprouter"
 	"github.com/graarh/golang-socketio"
 	"github.com/graarh/golang-socketio/transport"
 	"log"
-	"time"
+	// "time"
 )
-
-func handler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "Hi there, %s!", r.URL)
-	// fmt.Fprint(w, "Welcome!\n")
+type Channel struct {
+	Channel string `json:"channel"`
 }
 
-func withName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
+type Message struct {
+	Id      int    `json:"id"`
+	Channel string `json:"channel"`
+	Text    string `json:"text"`
 }
 
 func main() {
 	fmt.Println("_____API_SERVICES_STARTED_____")
 
-	router := httprouter.New()
-	router.GET("/", handler)
-	router.GET("/test/:name", withName)
+	server := gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
 
-	// http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
+		log.Println("connected")
+
+		c.Emit("/message", Message{10, "main", "using emit"})
+	})
+	server.On("/join", func(c *gosocketio.Channel, channel Channel) string {
+		log.Println("Client joined to ", channel.Channel)
+		return "joined to " + channel.Channel
+	})
+
+	serveMux := http.NewServeMux()
+	serveMux.Handle("/socket.io/", server)
+
+	log.Println("starting server...")
+	log.Panic(http.ListenAndServe(":3131", serveMux))
 }
