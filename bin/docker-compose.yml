@@ -1,0 +1,22 @@
+version: '3'
+
+services: 
+  db:
+    image: postgres:9.6
+    volumes: 
+      - ./postgres_data:/var/lib/postgresql/data
+    ports: 
+      - '5432'
+  server: 
+    build:
+      context: ../server
+      args: 
+        app_env: ${APP_ENV}
+    command: /usr/local/bin/start.sh
+    volumes:
+      - ../server:/go/src/github.com/user/cpt-chewieeee/canvas_world/server
+    ports:
+      - '8080:8080'
+    links:
+      - db
+
