@@ -2,5 +2,6 @@
 
 module.exports = [
   "./plugins/main",
-  "./plugins/demo"
+  // "./plugins/demo",
+  "./plugins/socket"
 ]

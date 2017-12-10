@@ -33,7 +33,11 @@ func main() {
 		log.Println("Client joined to ", channel.Channel)
 		return "joined to " + channel.Channel
 	})
-
+  server.On("send", func(c *gosocketio.Channel, msg Message) string {
+    //send event to all in room
+    c.BroadcastTo("chat", "message", msg)
+    return "OK"
+  })
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/socket.io/", server)
 

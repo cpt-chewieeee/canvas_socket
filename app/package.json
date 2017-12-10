@@ -44,6 +44,7 @@
     "css-loader": "^0.28.7",
     "electron": "1.7.9",
     "electron-builder": "^19.43.3",
+    "electron-reload": "^1.2.2",
     "electron-mocha": "^5.0.0",
     "friendly-errors-webpack-plugin": "^1.6.1",
     "mocha": "^4.0.1",
