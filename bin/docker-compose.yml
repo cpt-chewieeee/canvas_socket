@@ -6,7 +6,7 @@ services:
     volumes: 
       - ./postgres_data:/var/lib/postgresql/data
     ports: 
-      - '5432'
+      - '5432:5432'
   server: 
     build:
       context: ../server
@@ -16,7 +16,7 @@ services:
     volumes:
       - ../server:/go/src/github.com/user/cpt-chewieeee/canvas_world/server
     ports:
-      - '3131:3131'
+      - '3131:3113'
     links:
       - db
 
