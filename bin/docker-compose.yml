@@ -16,7 +16,7 @@ services:
     volumes:
       - ../server:/go/src/github.com/user/cpt-chewieeee/canvas_world/server
     ports:
-      - '3131:3113'
+      - '8080:8080'
     links:
       - db
 

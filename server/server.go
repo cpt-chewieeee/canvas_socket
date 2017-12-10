@@ -1,46 +1,54 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	// "github.com/julienschmidt/httprouter"
-	"github.com/graarh/golang-socketio"
-	"github.com/graarh/golang-socketio/transport"
-	"log"
-	// "time"
-)
-type Channel struct {
-	Channel string `json:"channel"`
-}
+  "fmt"
 
-type Message struct {
-	Id      int    `json:"id"`
-	Channel string `json:"channel"`
-	Text    string `json:"text"`
-}
+  "github.com/kataras/iris"
+  "github.com/kataras/iris/websocket"
+)
 
 func main() {
-	fmt.Println("_____API_SERVICES_STARTED_____")
+  app := iris.New()
 
-	server := gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
-
-	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel) {
-		log.Println("connected")
-
-		c.Emit("/message", Message{10, "main", "using emit"})
-	})
-	server.On("/join", func(c *gosocketio.Channel, channel Channel) string {
-		log.Println("Client joined to ", channel.Channel)
-		return "joined to " + channel.Channel
-	})
-  server.On("send", func(c *gosocketio.Channel, msg Message) string {
-    //send event to all in room
-    c.BroadcastTo("chat", "message", msg)
-    return "OK"
+  app.Get("/", func(ctx iris.Context) {
+    ctx.ServeFile("websockets.html", false) // second parameter: enable gzip?
   })
-	serveMux := http.NewServeMux()
-	serveMux.Handle("/socket.io/", server)
 
-	log.Println("starting server...")
-	log.Panic(http.ListenAndServe(":3131", serveMux))
+  setupWebsocket(app)
+
+  // x2
+  // http://localhost:8080
+  // http://localhost:8080
+  // write something, press submit, see the result.
+  app.Run(iris.Addr(":8080"))
+}
+
+func setupWebsocket(app *iris.Application) {
+  // create our echo websocket server
+  ws := websocket.New(websocket.Config{
+    ReadBufferSize:  1024,
+    WriteBufferSize: 1024,
+  })
+  ws.OnConnection(handleConnection)
+
+  // register the server on an endpoint.
+  // see the inline javascript code in the websockets.html, this endpoint is used to connect to the server.
+  app.Get("/echo", ws.Handler())
+
+  // serve the javascript built'n client-side library,
+  // see weboskcets.html script tags, this path is used.
+  app.Any("/iris-ws.js", func(ctx iris.Context) {
+    ctx.Write(websocket.ClientSource)
+  })
+}
+
+func handleConnection(c websocket.Connection) {
+  // Read events from browser
+  c.On("chat", func(msg string) {
+    // Print the message to the console, c.Context() is the iris's http context.
+    fmt.Printf("%s sent: %s\n", c.Context().RemoteAddr(), msg)
+    // Write message back to the client message owner:
+    // c.Emit("chat", msg)
+    c.To(websocket.Broadcast).Emit("chat", msg)
+  })
 }
